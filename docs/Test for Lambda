@@ -1,0 +1,171 @@
+### Setting up and Using a Test Event JSON for Lambda
+
+This guide provides detailed steps and examples to create a test event JSON file for the AWS Lambda function. This test event simulates an **EC2 Spot Instance Interruption Warning** and is used to ensure your Lambda function behaves as expected.
+
+---
+
+
+
+Below is an example of a test event JSON for an EC2 Spot Instance Interruption Warning:
+
+```json
+{
+  "version": "0",
+  "id": "a1b2c3d4-5678-90ab-cdef-12345EXAMPLE",
+  "detail-type": "EC2 Spot Instance Interruption Warning",
+  "source": "aws.ec2",
+  "account": "YOUR_AWS_ACCOUNT_ID",
+  "time": "2024-10-12T12:34:56Z",
+  "region": "YOUR_AWS_REGION",
+  "resources": [
+    "arn:aws:ec2:YOUR_AWS_REGION:YOUR_AWS_ACCOUNT_ID:instance/i-INSTANCE_ID"
+  ],
+  "detail": {
+    "instance-id": "i-INSTANCE_ID",
+    "instance-action": "terminate"
+  }
+}
+```
+
+### Replace the Following Fields:
+- **`YOUR_AWS_ACCOUNT_ID`**: Replace with your actual AWS account ID.
+- **`YOUR_AWS_REGION`**: Replace with the AWS region where your resources are located (e.g., `us-east-2`).
+- **`i-INSTANCE_ID`**: Replace with the EC2 instance ID you want to simulate.
+
+---
+
+### **2. Creating the Test Event JSON File**
+
+1. Open a text editor (e.g., VS Code, Notepad++, or a terminal editor like `vim`).
+2. Copy the above JSON template.
+3. Replace the placeholder values with your AWS-specific details.
+4. Save the file with a descriptive name, e.g., `ec2-spot-instance-warning.json`.
+
+---
+
+### **3. Setting Up and Running the Test Event**
+
+#### **A. Uploading the Test File to the AWS Console**
+
+1. Navigate to the AWS Lambda Console.
+2. Select the Lambda function you want to test.
+3. Click the **"Test"** button at the top-right corner.
+4. In the **Test event** pop-up:
+   - Click **"Create new event"**.
+   - Enter an event name (e.g., `SpotTerminationTest`).
+   - Paste your JSON test event into the event editor.
+5. Save the event.
+
+#### **B. Running the Test**
+
+1. Click the **"Test"** button after saving the event.
+2. View the execution result:
+   - If the function executes successfully, you'll see the output in the **Execution result** section.
+   - If there’s an error, review the **Log output** for details.
+
+---
+
+### **6. Example Output**
+
+After running the test, your Lambda function should:
+1. Log the handling of the spot instance termination.
+2. Simulate the scaling logic or other defined actions.
+3. Publish notifications to the configured SNS topic.
+
+Sample log output from a successful test might include:
+```plaintext
+[INFO] Handling spot instance termination warning for instance i-INSTANCE_ID
+[INFO] Disabling alarms for instance i-INSTANCE_ID
+[INFO] Creating snapshot for attached volume
+[INFO] Successfully detached volume and stopped instance
+```
+
+---
+
+### **7. Troubleshooting**
+
+- **JSON Syntax Errors**: Ensure the JSON structure is valid. Use online tools like [JSONLint](https://jsonlint.com/) to validate.
+- **Permission Errors**: Ensure your Lambda function has the required IAM permissions to interact with EC2, SNS, and CloudWatch.
+- **Logs**: Check CloudWatch logs for detailed debugging information.
+
+---
+
+By following these steps, you can effectively test and validate your Lambda function’s behavior for EC2 Spot Instance Interruption Warnings!
+
+---
+
+Instruction: Setting Up and Using a Test Event JSON for Scale Down Test in Lambda
+This guide provides detailed steps to create and use a test event JSON for simulating a Scale Down Test for the AWS Lambda function. This test ensures that the Lambda function properly handles low CPU utilization and triggers the scale-down logic as expected.
+
+1. Understanding the Test Event JSON
+Here is an example of a test event JSON for simulating the Scale Down Test:
+
+json
+Copy code
+{
+  "test_name": "test_ron_si_C_ScaleDown",
+  "test_mode": true,
+  "test_data": {
+    "current_instance": {
+      "InstanceId": "i-0d8e888f9d9f00a11",
+      "InstanceType": "t3a.medium",
+      "LaunchTime": "2024-10-12T21:00:00Z",
+      "State": {
+        "Name": "running"
+      },
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "ron.si.C.m"
+        }
+      ]
+    },
+    "cpu_utilization": 9
+  }
+}
+Field Details
+test_name: A descriptive name for the test (e.g., test_ron_si_C_ScaleDown).
+test_mode: Set to true to enable test mode. This bypasses actual CloudWatch data and uses the provided test_data.
+test_data:
+current_instance: Simulates the current EC2 instance being monitored:
+InstanceId: The EC2 instance ID to test.
+InstanceType: The type of the EC2 instance (e.g., t3a.medium).
+LaunchTime: The simulated launch time of the instance.
+State: The state of the instance (e.g., running).
+Tags: Tags associated with the instance, including the Name tag.
+cpu_utilization: Simulates the current CPU utilization (e.g., 9%, which is below the scaling-down threshold).
+2. Creating the Test Event JSON File
+Open your text editor (e.g., VS Code, Notepad++).
+Copy the above JSON template.
+Replace the placeholder values with the details of your EC2 instance and desired test parameters.
+Save the file with a descriptive name, such as scale-down-test.json.
+3. Setting Up and Running the Test in AWS Lambda
+A. Uploading the Test File to the AWS Lambda Console
+Navigate to the AWS Lambda Console.
+Select the Lambda function you want to test.
+Click the "Test" button at the top-right corner.
+In the Test event pop-up:
+Click "Create new event".
+Enter an event name (e.g., ScaleDownTest).
+Paste your JSON test event into the event editor.
+Save the event.
+B. Running the Test
+Click the "Test" button after saving the event.
+View the execution result:
+If the function executes successfully, the Execution result section will show the output.
+If there’s an error, review the Log output for debugging.
+4. Expected Behavior
+When you execute the test:
+
+The Lambda function simulates monitoring the provided EC2 instance (ron.si.C.m).
+The function identifies the low CPU utilization (9%, below the scale-down threshold).
+It initiates the scale-down process:
+Identifies the target instance for scaling down.
+Stops the current instance.
+Detaches and reattaches volumes as required.
+Tags and reconfigures alarms for the new instance.
+Logs the entire process in CloudWatch.
+5. Troubleshooting and Logs
+Check CloudWatch Logs: The Lambda function logs all actions to CloudWatch for debugging and verification.
+Permission Errors: Ensure your Lambda function has the required IAM permissions for EC2, CloudWatch, and SNS.
+Syntax Errors in JSON: Validate the JSON file using tools like JSONLint.
